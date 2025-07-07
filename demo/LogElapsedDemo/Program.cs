@@ -23,14 +23,14 @@ await ExampleWithoutHelper();
 
 async Task PrepareRepository()
 {
-    using var _ = logger.BeginLogElapsed("Prepare Repository");
+    using var _ = logger.BeginOperation("Prepare Repository");
 
     await Task.Delay(1000);
 }
 
 async Task GetResource(string id)
 {
-    using var operationWrapper = logger.BeginLogElapsed("Get Resource with Id {Id}", id);
+    using var operationWrapper = logger.BeginOperation("Get Resource with Id {Id}", id);
 
     try
     {
@@ -46,7 +46,7 @@ async Task GetResource(string id)
 
 async Task ManageResource(string id)
 {
-    using var operationWrapper = logger.BeginLogElapsed("Manage Resource with Id {Id}", id);
+    using var operationWrapper = logger.BeginOperation(useExtensiveLog: true, "Manage Resource with Id {Id}", id);
 
     try
     {
@@ -61,7 +61,7 @@ async Task ManageResource(string id)
 
 async Task UpdateResource(string id)
 {
-    using var operationWrapper = logger.BeginLogElapsed("Update Resource with Id {Id}", id);
+    using var operationWrapper = logger.BeginOperation("Update Resource with Id {Id}", id);
 
     try
     {

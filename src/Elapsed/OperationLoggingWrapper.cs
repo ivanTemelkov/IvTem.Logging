@@ -6,7 +6,7 @@ namespace IvTem.Logging.Elapsed;
 // This code is heavily influenced by the Dometrain course titled "From Zero to Hero: Logging in .NET" by Nick Chapsas
 // https://dometrain.com/course/from-zero-to-hero-logging-in-dotnet/
 
-public sealed class LogElapsedDisposable : ILogElapsed
+public sealed class OperationLoggingWrapper : ILoggingWrapper
 {
     private ILogger Logger { get; }
     private LogLevel LogLevel { get; set; }
@@ -20,8 +20,9 @@ public sealed class LogElapsedDisposable : ILogElapsed
     private bool IsKeepLog { get; set; }
 
     private Exception? Exception { get; set; }
+    public bool UseExtensiveLog { get; set; }
 
-    public LogElapsedDisposable(ILogger logger, LogLevel logLevel, string messageTemplate, object?[] args)
+    public OperationLoggingWrapper(ILogger logger, LogLevel logLevel, string messageTemplate, object?[] args)
     {
         Logger = logger;
         LogLevel = logLevel;
@@ -85,9 +86,13 @@ public sealed class LogElapsedDisposable : ILogElapsed
         Args[^3] = delta;
         Args[^2] = StartDateTime;
         Args[^1] = endDateTime;
-            
+
+        var messageTemplate = UseExtensiveLog
+            ? $"{MessageTemplate} failed in {{ElapsedMilliseconds}}ms. From {{StartDateTime:s}} to {{EndDateTime:s}}."
+            : $"{MessageTemplate} failed in {{ElapsedMilliseconds}}ms.";
+
         Logger.Log(LogLevel, Exception,
-            $"{MessageTemplate} failed in {{ElapsedMilliseconds}}ms. From {{StartDateTime:s}} to {{EndDateTime:s}}.",
+            messageTemplate,
             Args);
     }
 
@@ -101,9 +106,14 @@ public sealed class LogElapsedDisposable : ILogElapsed
         newArgs[^3] = delta;
         newArgs[^2] = StartDateTime;
         newArgs[^1] = endDateTime;
-                
+
+        var messageTemplate = UseExtensiveLog
+            ? $"{MessageTemplate} failed message '{{ErrorMessage}}' in {{ElapsedMilliseconds}}ms. From {{StartDateTime:s}} to {{EndDateTime:s}}."
+            : $"{MessageTemplate} failed message '{{ErrorMessage}}' in {{ElapsedMilliseconds}}ms.";
+
         Logger.Log(LogLevel,
-            $"{MessageTemplate} failed message '{{ErrorMessage}}' in {{ElapsedMilliseconds}}ms. From {{StartDateTime:s}} to {{EndDateTime:s}}.", newArgs);
+            messageTemplate,
+            newArgs);
     }
 
     private void LogSuccess(double delta, DateTime endDateTime)
@@ -111,9 +121,13 @@ public sealed class LogElapsedDisposable : ILogElapsed
         Args[^3] = delta;
         Args[^2] = StartDateTime;
         Args[^1] = endDateTime;
-            
+
+        var messageTemplate = UseExtensiveLog 
+            ? $"{MessageTemplate} completed in {{ElapsedMilliseconds}}ms. From {{StartDateTime:s}} to {{EndDateTime:s}}."
+            : $"{MessageTemplate} completed in {{ElapsedMilliseconds}}ms.";
+
         Logger.Log(LogLevel,
-            $"{MessageTemplate} took {{ElapsedMilliseconds}}ms. From {{StartDateTime:s}} to {{EndDateTime:s}}.",
+            messageTemplate,
             Args);
     }
 }
